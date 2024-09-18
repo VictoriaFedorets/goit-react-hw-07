@@ -1,8 +1,21 @@
 import ContactForm from "../ContactForm/ContactForm";
 import SearchBox from "../SearchBox/SearchBox";
 import ContactList from "../ContactList/ContactList";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchContacts } from "../../redux/contactsOps";
+import { useEffect } from "react";
+import Loader from "../Loader/Loader";
+import Error from "../Error/Error";
 
 export default function App() {
+  const loading = useSelector(state => state.contacts.loading);
+  const error = useSelector(state => state.contacts.error);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchContacts());
+  }, [dispatch]);
+
   // const starterContacts = [
   //   { id: "id-1", name: "Rosie Simpson", number: "459-12-56" },
   //   { id: "id-2", name: "Hermione Kline", number: "443-89-12" },
@@ -44,7 +57,10 @@ export default function App() {
     <div>
       <h1>Phonebook</h1>
       <ContactForm />
+      {loading && <Loader>Loading message...</Loader>}
+      {error && <Error>Error message...</Error>}
       <SearchBox />
+
       <ContactList />
     </div>
   );

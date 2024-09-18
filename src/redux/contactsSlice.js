@@ -7,59 +7,63 @@
 // selectContacts - повертає список контактів з властивості items.
 // З файла слайса експортуй редюсер, а також його екшени і селектори.
 
-import { createSlice } from "@reduxjs/toolkit";
+import { createSelector, createSlice } from "@reduxjs/toolkit";
+import { fetchContacts, addContact, deleteContact } from "./contactsOps";
+import { selectNameFilter } from "./filtersSlice";
 
 export const selectContacts = state => state.contacts.items;
 
 const contactsSlice = createSlice({
   name: "contacts",
   initialState: {
-    items: [
-      { id: "id-1", name: "Rosie Simpson", number: "459-12-56" },
-      { id: "id-2", name: "Hermione Kline", number: "443-89-12" },
-      { id: "id-3", name: "Eden Clements", number: "645-17-79" },
-      { id: "id-4", name: "Annie Copeland", number: "227-91-26" },
-    ],
+    items: [],
+    loading: false,
+    error: false,
   },
-  reducers: {
-    addContact: (state, action) => {
-      // з іммер
-      state.items.push(action.payload);
-      // без іммер
-      // return {
-      //   ...state,
-      //   items: [...state.items, action.payload],
-      // };
-    },
-    deleteContact: (state, action) => {
-      state.items = state.items.filter(
-        contact => contact.id !== action.payload
-      );
-
-      // return {
-      //   ...state,
-      //   items: state.items.filter(contact => contact.id !== action.payload),
-      // };
-    },
+  extraReducers: builder => {
+    builder
+      .addCase(fetchContacts.pending, (state, action) => {
+        state.loading = true;
+      })
+      .addCase(fetchContacts.fulfilled, (state, action) => {
+        state.items = action.payload;
+        state.loading = false;
+      })
+      .addCase(fetchContacts.rejected, (state, action) => {
+        state.loading = false;
+        state.error = true;
+      })
+      .addCase(addContact.pending, state => {
+        state.loading = true;
+        state.error = false;
+      })
+      .addCase(addContact.fulfilled, (state, action) => {
+        state.items.push(action.payload);
+        state.loading = false;
+      })
+      .addCase(addContact.rejected, (state, action) => {
+        state.loading = false;
+        state.error = true;
+        state.items = state.items.push(action.payload);
+      })
+      // ще тут peding та rejected
+      .addCase(deleteContact.fulfilled, (state, action) => {
+        state.items = state.items.filter(
+          contact => contact.id !== action.payload.id
+        );
+        state.loading = false;
+      });
   },
 });
 
-// console.log(contactsSlice);
+export const selectFilteredContacts = createSelector(
+  [selectContacts, selectNameFilter],
+  (contacts, filterName) => {
+    const visibleContacts = contacts.filter(contact =>
+      contact.name.toLowerCase().includes(filterName.toLowerCase())
+    );
+    return visibleContacts;
+  }
+);
 
-export const { addContact, deleteContact } = contactsSlice.actions;
-
-// Експортуємо редюсер слайсу
 export default contactsSlice.reducer;
-
-// case "filters/setStatusFilter":
-//   return {
-//     ...state,
-//     filters: {
-//       status: action.payload,
-//     },
-//   };
-
-//     default:
-//       return state;
-//   }
-// }
