@@ -46,12 +46,20 @@ const contactsSlice = createSlice({
         state.error = true;
         state.items = state.items.push(action.payload);
       })
-      // ще тут peding та rejected
+      .addCase(addContact.pending, (state, action) => {
+        state.loading = true;
+        state.error = false;
+      })
+
       .addCase(deleteContact.fulfilled, (state, action) => {
         state.items = state.items.filter(
           contact => contact.id !== action.payload.id
         );
         state.loading = false;
+      })
+      .addCase(addContact.rejected, (state, action) => {
+        state.loading = false;
+        state.error = true;
       });
   },
 });
