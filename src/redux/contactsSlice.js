@@ -46,7 +46,7 @@ const contactsSlice = createSlice({
         state.error = true;
         state.items = state.items.push(action.payload);
       })
-      .addCase(addContact.pending, (state, action) => {
+      .addCase(deleteContact.pending, (state, action) => {
         state.loading = true;
         state.error = false;
       })
@@ -57,7 +57,7 @@ const contactsSlice = createSlice({
         );
         state.loading = false;
       })
-      .addCase(addContact.rejected, (state, action) => {
+      .addCase(deleteContact.rejected, (state, action) => {
         state.loading = false;
         state.error = true;
       });
